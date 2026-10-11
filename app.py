@@ -21,9 +21,12 @@ if sys.platform.startswith('win'):
     else:
         st.warning("Warning: Tesseract-OCR engine not found in default directories. Please ensure it is installed.")
 
-st.set_page_config(page_title="Smart PDF Splitter", layout="wide")
+st.set_page_config(
+    page_title="מפצל PDF אוטומטי בעברית לפי שם עובד | Smart PDF Splitter",
+    page_icon="✂️️",
+    layout="wide"
+)
 
-# עיצוב מינימליסטי ומתקדם - כיווניות וצבעים
 st.markdown("""
     <style>
     .stApp, .stMarkdown, p, h1, h2, h3, h4, h5, h6, label, div {
@@ -96,9 +99,15 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("מפצל PDF חכם ✂️")
-st.write("מערכת אוטומטית לחלוקת קובצי PDF ומתן שמות - מבוסס OCR.")
+st.title("מפצל PDF חכם בעברית ✂️")
+st.markdown("""
+כלי חינמי ופתוח ל**פיצול קובצי PDF לפי שם עובד או לקוח**. 
+המערכת משתמשת בסריקה אופטית (OCR) לקריאת עברית מתוך תלושי שכר, חשבוניות וטפסים רשמיים, 
+ומעניקה לקבצים המפוצלים **שמות אוטומטיים בעברית** על פי מילות מפתח (כמו "לכבוד", "שם העובד" או מספר ת.ז).
+""")
 st.write("---") 
+st.write("מערכת אוטומטית לחלוקת קובצי PDF ומתן שמות - מבוסס OCR.")
+
 
 col_spacer1, col_center, col_spacer2 = st.columns([1, 2.5, 1])
 
