@@ -10,7 +10,6 @@ from PIL import Image
 import sys
 import os
 
-# התאמה חכמה: המחשב יחפש את Tesseract בשתי התיקיות הנפוצות בווינדוס
 if sys.platform.startswith('win'):
     path1 = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
     path2 = r'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe'
@@ -20,43 +19,129 @@ if sys.platform.startswith('win'):
     elif os.path.exists(path2):
         pytesseract.pytesseract.tesseract_cmd = path2
     else:
-        st.warning("שים לב: מנוע ה-OCR לא נמצא בתיקיות הרגילות. ודא שהתקנת את Tesseract.")
+        st.warning("Warning: Tesseract-OCR engine not found in default directories. Please ensure it is installed.")
 
-st.set_page_config(page_title="מפצל PDF חכם", layout="wide")
-st.title("מפצל PDF חכם ✂")
-st.write("כלי לחלוקת קובצי PDF ומתן שמות אוטומטי - פרויקט קוד פתוח מבוסס Tesseract OCR.")
+st.set_page_config(page_title="Smart PDF Splitter", layout="wide")
 
-method = st.radio(
-    "בחר שיטת פיצול:",
-    ["חלוקה קבועה לעמודים + שמות מקובץ אקסל", "זיהוי וחלוקה חכמה (סריקה מהירה לפי מילת מפתח)"]
-)
+# עיצוב מינימליסטי ומתקדם - כיווניות וצבעים
+st.markdown("""
+    <style>
+    .stApp, .stMarkdown, p, h1, h2, h3, h4, h5, h6, label, div {
+        direction: rtl !important;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    h1, h2, h3 {
+        text-align: center !important;
+    }
+    .stMarkdown p {
+        text-align: center !important;
+        color: #4b5563; /* אפור עדין לטקסט תיאור */
+    }
 
-uploaded_file = st.file_uploader("העלה קובץ PDF", type="pdf")
+    [data-testid="stRadio"] {
+        width: fit-content !important; 
+        position: relative !important;
+        right: 90% !important; /* מזיז למרכז */
+        transform: translateX(50%) !important; /* מאזן את הקופסה בול לאמצע */
+        padding: 25px 35px !important;
+        border: 1px solid #e5e7eb !important;
+        border-radius: 16px !important;
+        background-color: #ffffff !important;
+        box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05) !important;
+    }
+    
+    [role="radiogroup"] {
+        align-items: flex-start !important;
+        gap: 12px;
+    }
+
+    [data-testid="stWidgetLabel"] {
+        display: block;
+        text-align: center !important;
+        font-weight: bold;
+        font-size: 1.1em;
+        margin-bottom: 10px;
+    }
+
+    [data-testid="stFileUploader"] {
+        padding: 15px;
+        background-color: #f8fafc;
+        border-radius: 12px;
+    }
+    [data-testid="stFileUploader"] > section {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        [data-testid="stRadio"] {
+            border-color: #374151 !important;
+            background-color: #1f2937 !important;
+        }
+        .stMarkdown p { color: #9ca3af; }
+        [data-testid="stFileUploader"] { background-color: #111827; }
+    }
+
+    .stButton > button, [data-testid="stDownloadButton"] > button {
+        display: block !important;
+        margin: 20px auto !important;
+        border-radius: 40px !important;
+        font-weight: bold !important;
+    }
+    
+    input { text-align: center !important; }
+    th, td { text-align: center !important; }
+    </style>
+""", unsafe_allow_html=True)
+
+st.title("מפצל PDF חכם ✂️")
+st.write("מערכת אוטומטית לחלוקת קובצי PDF ומתן שמות - מבוסס OCR.")
+st.write("---") 
+
+col_spacer1, col_center, col_spacer2 = st.columns([1, 2.5, 1])
+
+with col_center:
+    method = st.radio(
+        "בחר שיטת פיצול:",
+        ["חלוקה קבועה לעמודים + שמות מקובץ אקסל", "זיהוי וחלוקה חכמה (סריקה מהירה לפי מילת מפתח)"]
+    )
+    st.write("") # מרווח נשימה
+    uploaded_file = st.file_uploader("העלה קובץ PDF לפיצול", type="pdf")
+
+st.write("---")
 
 if uploaded_file:
     reader = PdfReader(uploaded_file)
     total_pages = len(reader.pages)
-    st.info(f"הקובץ מכיל {total_pages} עמודים.")
+    
+    _, info_col, _ = st.columns([1, 2, 1])
+    with info_col:
+        st.info(f"📄 הקובץ נטען בהצלחה! סה״כ: {total_pages} עמודים.")
 
     if st.button("🔄 רענן נתונים ונקה טבלה"):
         for key in ['pdf_data', 'current_file']:
             if key in st.session_state:
                 del st.session_state[key]
 
-    # ---------------- אופציה 1: חלוקה קבועה + אקסל ----------------
+    # ---------------- Option 1: Fixed Page Splitting + Excel ----------------
     if method == "חלוקה קבועה לעמודים + שמות מקובץ אקסל":
         
-        col1, col2 = st.columns([1, 2])
-        with col1:
-            pages_per_split = st.number_input("כל כמה עמודים לפצל?", min_value=1, max_value=total_pages, value=1)
-        
-        with col2:
-            excel_file = st.file_uploader("העלה קובץ אקסל (.xlsx) או CSV עם רשימת השמות", type=["xlsx", "csv"])
-            
+        _, opt1_col, _ = st.columns([1, 3, 1])
+        with opt1_col:
+            col1, col2 = st.columns([1, 2])
+            with col1:
+                pages_per_split = st.number_input("כל כמה עמודים לפצל?", min_value=1, max_value=total_pages, value=1)
+            with col2:
+                excel_file = st.file_uploader("העלה קובץ שמות (.xlsx / .csv)", type=["xlsx", "csv"])
+                
         if excel_file:
             try:
                 df_names = pd.read_csv(excel_file) if excel_file.name.endswith('.csv') else pd.read_excel(excel_file)
-                name_column = st.selectbox("בחר את העמודה שמכילה את שמות הקבצים:", df_names.columns)
+                _, select_col, _ = st.columns([1, 2, 1])
+                with select_col:
+                    name_column = st.selectbox("בחר עמודת שמות:", df_names.columns)
                 
                 if st.button("בצע חלוקה והחל שמות"):
                     st.session_state.current_file = uploaded_file.name
@@ -81,13 +166,14 @@ if uploaded_file:
             except Exception as e:
                 st.error(f"שגיאה בקריאת הקובץ: {e}")
 
-    # ---------------- אופציה 2: סריקה (Tesseract) ----------------
+    # ---------------- Option 2: Smart OCR Splitting (Tesseract) ----------------
     elif method == "זיהוי וחלוקה חכמה (סריקה מהירה לפי מילת מפתח)":
         
-        # שדה חדש שהמשתמש יכול לערוך
-        anchor_word = st.text_input("לפי איזו מילה תרצה לחלץ את השם? (המילה שמופיעה מיד לפני השם)", value="שם העובד")
+        _, opt2_col, _ = st.columns([1, 2, 1])
+        with opt2_col:
+            anchor_word = st.text_input("מילת החיפוש (המילה שמופיעה מיד לפני השם):", value="שם העובד")
         
-        if st.button("סרוק ופצל בעזרת OCR"):
+        if st.button("🔍 פצל בעזרת OCR"):
             st.session_state.current_file = uploaded_file.name
             
             try:
@@ -98,11 +184,13 @@ if uploaded_file:
                 current_id = None
                 start_page = 1
                 
-                progress_bar = st.progress(0)
-                status_text = st.empty()
+                _, prog_col, _ = st.columns([1, 2, 1])
+                with prog_col:
+                    progress_bar = st.progress(0)
+                    status_text = st.empty()
                 
-                # התאמה של מילת החיפוש שהוזנה כך שתתעלם מרווחים לא מדויקים במסמך
                 safe_anchor = re.escape(anchor_word.strip()).replace(r'\ ', r'\s*')
+                blacklist = ["תיק ניכויים", "מספר זהות", "תעודת זהות", "תלוש שכר", "שם משפחה", "קוד אישי", "שם עובד"]
                 
                 for i in range(total_pages):
                     status_text.text(f"סורק עמוד {i+1} מתוך {total_pages}...")
@@ -115,14 +203,16 @@ if uploaded_file:
                     clean_text = " ".join(extracted_text.split())
                     
                     page_id = f"לא_מזוהה_עמוד_{i+1}"
-                    
-                    # חיפוש חכם שמבוסס על מה שהקלדת בתיבת הטקסט
                     pattern = rf'{safe_anchor}\s*[:\-]?\s*([א-ת]+\s+[א-ת]+)'
-                    name_match = re.search(pattern, clean_text)
                     
-                    if name_match:
-                        page_id = name_match.group(1).strip()
-                    else:
+                    matches = re.finditer(pattern, clean_text)
+                    for match in matches:
+                        potential_name = match.group(1).strip()
+                        if not any(bad_word in potential_name for bad_word in blacklist):
+                            page_id = potential_name
+                            break
+                    
+                    if page_id == f"לא_מזוהה_עמוד_{i+1}":
                         id_match = re.search(r'(?<!\d)(\d{8,9})(?!\d)', clean_text)
                         if id_match:
                             page_id = f"עובד_{id_match.group(1)}"
@@ -149,18 +239,22 @@ if uploaded_file:
                     })
                     
                 st.session_state.pdf_data = extracted_data
-                status_text.text("הסריקה הסתיימה בהצלחה!")
+                status_text.text("✅ הסריקה הסתיימה בהצלחה!")
                 
             except Exception as e:
                 st.error(f"שגיאת עיבוד ב-OCR. פרטי השגיאה: {e}")
 
-    # ---------------- טבלת עריכה וייצוא (משותף) ----------------
+    # ---------------- Data Editor and Export Module ----------------
     if 'pdf_data' in st.session_state:
+        st.write("---")
         st.write("### 📝 עריכה סופית לפני ייצוא")
-        st.write("כאן ניתן לוודא שהשמות נשלפו נכון ולתקן ידנית במידת הצורך.")
         
-        df = pd.DataFrame(st.session_state.pdf_data)
-        edited_df = st.data_editor(df, num_rows="dynamic", use_container_width=True)
+        _, table_col, _ = st.columns([1, 4, 1])
+        with table_col:
+            st.write("אנא ודא שהשמות נשלפו נכון ותקן ידנית במידת הצורך:")
+            df = pd.DataFrame(st.session_state.pdf_data)
+            edited_df = st.data_editor(df, num_rows="dynamic", use_container_width=True)
+
 
         if st.button("✂️ פצל והורד קבצים (ZIP)"):
             zip_buffer = io.BytesIO()
@@ -189,7 +283,7 @@ if uploaded_file:
                     zip_file.writestr(file_name, pdf_buffer.getvalue())
 
             st.download_button(
-                label="⬇️ לחץ כאן להורדת ה-ZIP",
+                label="⬇️ לחץ כאן להורדת הקבצים (ZIP)",
                 data=zip_buffer.getvalue(),
                 file_name="split_documents.zip",
                 mime="application/zip"
