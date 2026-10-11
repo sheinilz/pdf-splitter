@@ -1,2 +1,65 @@
-# pdf-splitter
-Smart PDF Splitter with automatic Hebrew text recognition (OCR)
+# ✂️️ Smart PDF Splitter - מפצל PDF אוטומטי בעברית
+
+[![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-App-red.svg)](https://streamlit.io/)
+[![Tesseract](https://img.shields.io/badge/Tesseract-OCR-green.svg)](https://github.com/tesseract-ocr/tesseract)
+
+**פיצול תלושי שכר וקובצי PDF ומתן שמות אוטומטי בעברית בעזרת (OCR)**
+
+מערכת חכמה מבוססת קוד פתוח שנועדה לחסוך שעות של עבודה ידנית. המערכת מקבלת קובץ PDF מרובה עמודים (כמו ריכוז תלושי שכר, קבלות או טפסים רשמיים), קוראת את הטקסט בעברית מתוך המסמך, ומפצלת אותו לקבצים נפרדים שכל אחד מהם מקבל אוטומטית את שם העובד או הלקוח שמופיע בו.
+
+---
+
+## ✨ תכונות מרכזיות (Features)
+
+* 🧠 **זיהוי טקסט חכם (OCR בעברית):** חילוץ אוטומטי של שם העובד לפי מילת עוגן (למשל: "לכבוד", "שם העובד"). הקוד כולל סינון חכם לביטויים שגויים ("תיק ניכויים", "מספר זהות").
+* 📊 **סנכרון לקובצי נתונים:** אפשרות חלופית לפיצול עמודים קבוע ושאיבת שמות מקובץ Excel או CSV.
+* ✏️ **בקרת איכות בזמן אמת:** טבלה אינטראקטיבית המאפשרת למשתמש לעבור על השמות שזוהו ולערוך אותם ידנית לפני גזירת הקבצים.
+* 📦 **ייצוא בלחיצה אחת:** אריזת כל קובצי ה-PDF שפוצלו לתוך קובץ ZIP אחד מסודר.
+* 🔒 **מותאם לאבטחת מידע:** בנוי להרצה מקומית מלאה ללא צורך בהעלאת מסמכים פיננסיים לענן.
+
+---
+
+## 🚀 הדגמה חיה (Live Demo)
+
+ניתן להתנסות במערכת דרך הקישור הבא:
+👉 **[הכנס כאן את הקישור שקיבלת מ-Streamlit, למשל: https://your-app-name.streamlit.app]**
+
+> **⚠️ הערת אבטחת מידע חשובה:** 
+> גרסת הענן נועדה ל**הדגמה בלבד עם נתונים פיקטיביים**. מטעמי הגנת הפרטיות, אין להעלות תלושי שכר אמיתיים או מסמכים המכילים מידע רגיש לשרת החינמי. לשימוש בארגונים ובמידע אמיתי, יש להתקין את המערכת מקומית (ראו הוראות מטה).
+
+---
+
+## 💻 טכנולוגיות וספריות (Tech Stack)
+
+* **שפת תכנות:** Python
+* **ממשק משתמש (Frontend):** Streamlit
+* **עיבוד מסמכים:** `PyMuPDF` (fitz) להמרת עמודים לתמונות, `PyPDF2` לחיתוך ויצירת קובצי ה-PDF החדשים.
+* **זיהוי טקסט (OCR):** `pytesseract` בשילוב מנוע Tesseract מותקן מקומית עם חבילת השפה העברית (`heb`).
+* **ניהול נתונים:** `pandas` לעיבוד קובצי אקסל וטבלאות התצוגה.
+
+---
+
+## 🛠️️ התקנה והרצה מקומית (Local Installation)
+
+לשימוש מאובטח בארגונים או בבית, ניתן להריץ את המערכת על המחשב האישי:
+
+### 1. דרישות קדם:
+* התקנת [Python](https://www.python.org/downloads/).
+* התקנת **Tesseract OCR** עבור Windows:
+  * הורידו את תוכנת ההתקנה מכאן: [Tesseract at UB Mannheim](https://github.com/UB-Mannheim/tesseract/wiki).
+  * **חשוב:** במהלך ההתקנה, תחת *Additional language data*, סמנו את **Hebrew**.
+
+### 2. התקנת הפרויקט:
+פתחו את שורת הפקודה (Terminal/CMD) והקלידו:
+
+```bash
+# שכפול המאגר
+git clone [https://github.com/YOUR-USERNAME/YOUR-REPO-NAME.git](https://github.com/YOUR-USERNAME/YOUR-REPO-NAME.git)
+cd YOUR-REPO-NAME
+
+# התקנת ספריות הפייתון הדרושות
+pip install -r requirements.txt
+
+# הפעלת המערכת
+streamlit run app.py
